@@ -5,7 +5,7 @@
 //======================================================================
 
 import React from 'react';
-import locationGif from '../img/location.gif';
+import locationGif from './assets/location.gif';
 
 function Info() {
   return (

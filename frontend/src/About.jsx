@@ -5,7 +5,7 @@
 //======================================================================
 
 import React from 'react';
-import myImage from '../img/confusion_matrix.png';
+import myImage from './assets/confusion_matrix.png';
 
 function About() {
   return (
