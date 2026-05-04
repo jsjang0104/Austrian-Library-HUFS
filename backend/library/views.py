@@ -61,6 +61,12 @@ class LoanViewSet(viewsets.ModelViewSet):
     """
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            return Loan.objects.filter(member=user)
+        return Loan.objects.none()
     @action(detail=False, methods=['post'], url_path='checkout')
     def checkout_book(self, request):
         book_id = request.data.get('book_id')
