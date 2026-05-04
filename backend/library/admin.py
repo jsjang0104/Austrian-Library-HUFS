@@ -25,6 +25,7 @@ class LoanAdmin(admin.ModelAdmin):
     search_fields = ('book__title', 'member__name', 'member__sid')
     list_filter = ('loan_date', 'return_date')
     readonly_fields = ('due_date', 'loan_date')
+    autocomplete_fields = ('book', 'member')
 
     def get_book_title(self, obj):
         return obj.book.title
