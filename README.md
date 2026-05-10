@@ -1,80 +1,23 @@
 # Austrian Library HUFS
 
-This project is a web-based library management system for the Austrian Library at Hankuk University of Foreign Studies (HUFS). It features a Django backend and a React frontend.
+한국외국어대학교 서양어대학 독일어과 부속 오스트리아도서관 디지털화 및 AI 기술 접목 프로젝트
 
-## Project Structure
-
-```text
-.
-├── backend/            # Django Backend
-│   ├── common/         # Common utilities
-│   ├── config/         # Django core configuration
-│   ├── library/        # Library management logic
-│   ├── manager/        # Admin/Manager views
-│   ├── members/        # User and authentication
-│   └── manage.py       # Django management script
-├── frontend/           # React Frontend (Vite)
-│   ├── src/
-│   │   ├── assets/     # Images and static assets
-│   │   ├── api/        # API client configuration
-│   │   └── ...         # React components
-│   └── package.json    # Frontend dependencies and scripts
-├── docs/               # Documentation and tasks
-├── requirements.txt    # Unified Python dependencies
-└── README.md           # This file
+## Structure
+```
+└── backend/      
+└── frontend/          
+└── model/     # book genre classifier
 ```
 
-## Getting Started
+## 연동된 Project
+- 2025-2 HUFS H-UP 진로탐색학점제: full stack development (창조상 수상)
+- 2025-2 Understanding Machine Learning: book genre classifier
+- 2026-1 Introduction to Multimodel AI:
+- 2026-1 Information Retrieval and Recommender System:
 
-### Prerequisites
+## 참고사항
+- **model/ 수정 시**: https://huggingface.co/jsjang0104/book-genre-classifier-bert와 연동되어있음. 코드 수정 시 두 곳에 전부 push할 것 
+  - git push origin main
+  - git push hf main
 
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL (for production/local DB)
 
-### Backend Setup
-
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run migrations:
-   ```bash
-   cd backend
-   python manage.py migrate
-   ```
-4. Start the server:
-   ```bash
-   python manage.py runserver
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-## Development
-
-The frontend is configured with `concurrently` to run both the frontend and backend development servers if needed. See `frontend/package.json` for details.
-
-## Tech Stack
-
-- **Frontend**: React, Vite, Axios, Zustand
-- **Backend**: Django, Django REST Framework
-- **Database**: PostgreSQL (Neon DB)
-- **Deployment**: Vercel (Frontend), Render (Backend)
