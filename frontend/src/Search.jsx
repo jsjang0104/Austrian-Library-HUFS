@@ -184,33 +184,52 @@ function Search() {
                 </tbody>
               </table>
             </div>
-            {books.length > PAGE_SIZE && (
-              <div className="pagination">
-                <button
-                  className="page-btn"
-                  onClick={() => setCurrentPage((p) => p - 1)}
-                  disabled={currentPage === 1}
-                >
-                  &lt;
-                </button>
-                {Array.from({ length: Math.ceil(books.length / PAGE_SIZE) }, (_, i) => i + 1).map((page) => (
+            {books.length > PAGE_SIZE && (() => {
+              const totalPages = Math.ceil(books.length / PAGE_SIZE);
+              const delta = 2;
+              const pages = [];
+              const range = [];
+              for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                range.push(i);
+              }
+              pages.push(1);
+              if (range[0] > 2) pages.push('...');
+              pages.push(...range);
+              if (range[range.length - 1] < totalPages - 1) pages.push('...');
+              if (totalPages > 1) pages.push(totalPages);
+
+              return (
+                <div className="pagination">
                   <button
-                    key={page}
-                    className={`page-btn ${currentPage === page ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(page)}
+                    className="page-btn"
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    disabled={currentPage === 1}
                   >
-                    {page}
+                    &lt;
                   </button>
-                ))}
-                <button
-                  className="page-btn"
-                  onClick={() => setCurrentPage((p) => p + 1)}
-                  disabled={currentPage === Math.ceil(books.length / PAGE_SIZE)}
-                >
-                  &gt;
-                </button>
-              </div>
-            )}
+                  {pages.map((page, idx) =>
+                    page === '...' ? (
+                      <span key={`ellipsis-${idx}`} className="page-ellipsis">...</span>
+                    ) : (
+                      <button
+                        key={page}
+                        className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+                  <button
+                    className="page-btn"
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    &gt;
+                  </button>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>

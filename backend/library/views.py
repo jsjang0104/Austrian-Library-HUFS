@@ -6,7 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework import filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Book, Loan, Notice, Member 
+from .models import Book, Loan, Notice, Member
 from .serializers import BookSerializer, LoanSerializer, NoticeSerializer
 
 
@@ -30,14 +30,14 @@ class BookViewSet(viewsets.ModelViewSet):
                                            .replace('ue', 'ü')\
                                            .replace('ss', 'ß')
             queryset = queryset.filter(
-                Q(title__icontains=search_keyword) | 
+                Q(title__icontains=search_keyword) |
                 Q(title__icontains=german_keyword) |
                 Q(author__icontains=search_keyword) |
                 Q(author__icontains=german_keyword) |
-                Q(language__icontains=search_keyword) |      
-                Q(call_number__icontains=search_keyword) |   
-                Q(category__icontains=search_keyword) |      
-                Q(location__icontains=search_keyword)        
+                Q(language__icontains=search_keyword) |
+                Q(call_number__icontains=search_keyword) |
+                Q(category__icontains=search_keyword) |
+                Q(location__icontains=search_keyword)
             )
 
         language_filter = self.request.query_params.get("language")
@@ -70,21 +70,21 @@ class LoanViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], url_path='checkout')
     def checkout_book(self, request):
         book_id = request.data.get('book_id')
-        member = request.user 
+        member = request.user
 
         if not book_id:
             return Response({'error': '책의 QR코드를 스캔해주세요.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not member.is_authenticated:
             return Response({'error': '로그인이 필요합니다.'}, status=status.HTTP_401_UNAUTHORIZED)
-            
+
         try:
             with transaction.atomic():
                 book = Book.objects.select_for_update().get(book_id=book_id)
 
                 if book.status == Book.Status.ON_LOAN:
                     return Response({'error': '이미 대출 중인 도서입니다.'}, status=status.HTTP_400_BAD_REQUEST)
-                
+
                 book.status = Book.Status.ON_LOAN
                 book.save()
                 due_date = timezone.now() + timedelta(days=14)
@@ -105,7 +105,7 @@ class LoanViewSet(viewsets.ModelViewSet):
     def checkin_book(self, request, pk=None):
         try:
             with transaction.atomic():
-                loan = self.get_object() 
+                loan = self.get_object()
 
                 if loan.return_date is not None:
                     return Response({'error': '이미 반납 처리된 대출입니다.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -113,7 +113,7 @@ class LoanViewSet(viewsets.ModelViewSet):
                 book.status = Book.Status.AVAILABLE
                 book.save()
                 loan.return_date = timezone.now()
-                
+
                 loan.save()
 
                 serializer = self.get_serializer(loan)
@@ -136,6 +136,6 @@ class NoticeViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         Notice.objects.filter(pk=instance.pk).update(view_count=models.F('view_count') + 1)
         instance.refresh_from_db()
-        
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
