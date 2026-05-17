@@ -18,7 +18,6 @@
 ## 연동된 Project
 - 2025-2 HUFS H-UP 진로탐색학점제: full stack development (창조상 수상)
 - 2025-2 Understanding Machine Learning: book genre classifier — [GitHub](https://github.com/jsjang0104/Book-Classifier)
-- 2026-1 Introduction to Multimodel AI:
 - 2026-1 Information Retrieval and Recommender System:
 
 ## 참고사항
