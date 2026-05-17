@@ -20,8 +20,3 @@
     ├── dev/        # 개발 기록
     └── management/ # 운영 가이드라인 및 보고서
 ```
-
-## 참고사항
-- **model/ 수정 시**: https://huggingface.co/jsjang0104/book-genre-classifier-bert 와 연동되어있음. 코드 수정 시 두 곳에 전부 push할 것
-  - `git push origin main`
-  - `git push hf main`
