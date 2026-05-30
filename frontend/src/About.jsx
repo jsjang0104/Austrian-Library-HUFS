@@ -47,9 +47,9 @@ function About() {
           <br />
         <h3>1.2 모델 학습</h3>
         <p>
-          Pre-trained Model: <a href="https://huggingface.co/google-bert/bert-base-multilingual-cased">mBERT</a> fine-tuning.<br />
+          Pre-trained Model: <a href="https://huggingface.co/google-bert/bert-base-multilingual-cased">mBERT</a><br />
           Dataset: <a href="https://huggingface.co/datasets/SBB/ARK-Metadata">Berlin State Library 제공 다국어 도서 공개 데이터셋</a> (training, evaluation, test 8:1:1)<br />
-          Target Task: Multiclass Classification (class: 문학, 어학, 사회과학, 역사)<br />
+          Target Task: Multiclass Classification Fine-tuning (class: 문학, 어학, 사회과학, 역사)<br />
           Model Link: <a href="https://huggingface.co/jsjang0104/book-genre-classifier-bert">https://huggingface.co/jsjang0104/book-genre-classifier-bert</a>
           <br />
         </p>
