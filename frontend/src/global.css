@@ -710,6 +710,27 @@ a.site-title {
   background-color: #5a4a3a;
 }
 
+.ai-search-btn {
+  padding: 0 20px;
+  font-size: 15px;
+  background-color: transparent;
+  color: #7c5cbf;
+  border: 2px solid #7c5cbf;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.ai-search-btn:hover {
+  background-color: #f0eafa;
+}
+
+.ai-search-btn.active {
+  background-color: #7c5cbf;
+  color: white;
+}
+
 /* ========================================= */
 /* 검색 페이지 모바일 (768px 이하)           */
 /* ========================================= */
@@ -732,6 +753,12 @@ a.site-title {
   }
 
   .search-btn-lg {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 15px;
+  }
+
+  .ai-search-btn {
     width: 100%;
     padding: 12px 0;
     font-size: 15px;
