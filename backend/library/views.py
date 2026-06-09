@@ -86,19 +86,14 @@ class BookViewSet(viewsets.ModelViewSet):
         try:
             vector_id_scores = search_service.vector_search(query, top_k=30)
             vector_ids = [book_id for book_id, _score in vector_id_scores]
+            vector_book_map = base_qs.in_bulk(vector_ids)
+            result_books = [vector_book_map[bid] for bid in vector_ids if bid in vector_book_map]
         except Exception as exc:
             import logging
             logging.getLogger(__name__).warning("vector_search 실패, 키워드 결과만 반환: %s", exc)
-            vector_ids = []
+            result_books = list(self._filter_by_keyword(base_qs, query))
 
-        vector_book_map = base_qs.in_bulk(vector_ids)
-        vector_books = [vector_book_map[bid] for bid in vector_ids if bid in vector_book_map]
-        vector_id_set = {book.book_id for book in vector_books}
-
-        keyword_books = list(self._filter_by_keyword(base_qs, query))
-        keyword_only_books = [b for b in keyword_books if b.book_id not in vector_id_set]
-
-        serializer = self.get_serializer(vector_books + keyword_only_books, many=True)
+        serializer = self.get_serializer(result_books, many=True)
         return Response(serializer.data)
 
 class LoanViewSet(viewsets.ModelViewSet):
