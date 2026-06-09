@@ -1,14 +1,18 @@
-"""Django DB의 전체 도서를 임베딩하여 검색용 FAISS 인덱스를 새로 구축한다."""
+"""Django DB의 전체 도서를 HF Inference API로 임베딩하여 검색용 FAISS 인덱스를 새로 구축한다."""
+import logging
+
 from django.core.management.base import BaseCommand
 
 from library import search_service
 from library.models import Book
 
+logger = logging.getLogger(__name__)
+
 BATCH_SIZE = 64
 
 
 class Command(BaseCommand):
-    help = "전체 도서(title + author)를 임베딩해 FAISS 인덱스를 처음부터 다시 구축한다."
+    help = "전체 도서(title + author)를 HF API로 임베딩해 FAISS 인덱스를 처음부터 다시 구축한다."
 
     def handle(self, *args, **options):
         total = Book.objects.count()
@@ -19,19 +23,32 @@ class Command(BaseCommand):
         search_service.reset_index()
 
         indexed = 0
+        failed = 0
         batch = []
         for book in Book.objects.all().iterator(chunk_size=BATCH_SIZE):
             batch.append(book)
             if len(batch) >= BATCH_SIZE:
+                try:
+                    search_service.add_books(batch)
+                    indexed += len(batch)
+                    self.stdout.write(f"  {indexed}/{total}권 임베딩 완료")
+                except Exception as exc:
+                    failed += len(batch)
+                    logger.warning("배치 임베딩 실패 (%d권 건너뜀): %s", len(batch), exc)
+                batch = []
+
+        if batch:
+            try:
                 search_service.add_books(batch)
                 indexed += len(batch)
-                self.stdout.write(f"  {indexed}/{total}권 임베딩 완료")
-                batch = []
-        if batch:
-            search_service.add_books(batch)
-            indexed += len(batch)
+            except Exception as exc:
+                failed += len(batch)
+                logger.warning("배치 임베딩 실패 (%d권 건너뜀): %s", len(batch), exc)
 
-        search_service.save_index()
-        self.stdout.write(self.style.SUCCESS(
-            f"총 {indexed}권을 임베딩하여 인덱스를 구축했습니다 → {search_service.INDEX_PATH}"
-        ))
+        if indexed > 0:
+            search_service.save_index()
+            self.stdout.write(self.style.SUCCESS(
+                f"총 {indexed}권을 임베딩하여 인덱스를 구축했습니다 → {search_service.INDEX_PATH}"
+            ))
+        if failed > 0:
+            self.stdout.write(self.style.WARNING(f"{failed}권은 임베딩 실패로 인덱스에서 제외되었습니다."))

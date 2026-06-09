@@ -1,36 +1,70 @@
 """
 도서 제목/저자 기반 의미 유사도 검색 서비스.
 
-경량 다국어 문장 임베딩 모델(MiniLM)로 도서를 벡터화하고,
+HF Inference API(paraphrase-multilingual-MiniLM-L12-v2)로 임베딩을 계산하고
 FAISS 인덱스에 저장해 유사도 검색을 수행한다.
-모델·인덱스는 프로세스당 1회만 로드되는 싱글턴으로 관리한다.
+모델은 Render 서버 메모리에 로드되지 않는다.
 """
+import logging
 import os
 import threading
+import time
 
 import faiss
 import numpy as np
+import requests
 from django.conf import settings
-from sentence_transformers import SentenceTransformer
+
+logger = logging.getLogger(__name__)
 
 EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_DIM = 384  # paraphrase-multilingual-MiniLM-L12-v2 출력 차원
+
+_HF_API_URL = f"https://api-inference.huggingface.co/models/{EMBEDDING_MODEL_NAME}"
+_HF_BATCH_SIZE = 32
+_HF_TIMEOUT = 60
 
 INDEX_DIR = os.path.join(settings.MEDIA_ROOT, "search_index")
 INDEX_PATH = os.path.join(INDEX_DIR, "books.faiss")
 
-# 모델 로딩과 인덱스 로딩이 서로를 호출하므로 재진입 가능한 락을 사용한다.
 _lock = threading.RLock()
-_model = None
 _index = None
 
 
-def get_model():
-    global _model
-    if _model is None:
-        with _lock:
-            if _model is None:
-                _model = SentenceTransformer(EMBEDDING_MODEL_NAME)
-    return _model
+def _hf_headers():
+    token = getattr(settings, "HF_API_TOKEN", None) or os.environ.get("HF_API_TOKEN")
+    return {"Authorization": f"Bearer {token}"} if token else {}
+
+
+def embed_texts(texts):
+    """
+    HF Inference API로 텍스트 배치를 L2 정규화된 임베딩 행렬(float32)로 변환한다.
+    429/503 응답에는 지수 백오프로 최대 3회 재시도한다.
+    실패 시 예외를 발생시킨다.
+    """
+    headers = _hf_headers()
+    all_vectors = []
+
+    for i in range(0, len(texts), _HF_BATCH_SIZE):
+        batch = texts[i:i + _HF_BATCH_SIZE]
+        for attempt in range(3):
+            resp = requests.post(
+                _HF_API_URL,
+                headers=headers,
+                json={"inputs": batch, "options": {"wait_for_model": True}},
+                timeout=_HF_TIMEOUT,
+            )
+            if resp.status_code in (429, 503) and attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
+            resp.raise_for_status()
+            break
+        all_vectors.extend(resp.json())
+
+    vectors = np.array(all_vectors, dtype="float32")
+    norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+    norms = np.where(norms == 0, 1.0, norms)
+    return vectors / norms
 
 
 def book_text(title, author):
@@ -38,21 +72,8 @@ def book_text(title, author):
     return f"{title} {author}".strip() if author else title
 
 
-def embed_texts(texts):
-    """텍스트 배치를 (mean-pooling + L2 정규화된) 임베딩 행렬로 변환"""
-    vectors = get_model().encode(
-        texts,
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-    )
-    return vectors.astype("float32")
-
-
 def _empty_index():
-    dim = get_model().get_embedding_dimension()
-    return faiss.IndexIDMap(faiss.IndexFlatIP(dim))
+    return faiss.IndexIDMap(faiss.IndexFlatIP(EMBEDDING_DIM))
 
 
 def get_index():
@@ -82,8 +103,8 @@ def reset_index():
 
 def add_books(books):
     """
-    여러 도서의 임베딩을 계산해 인덱스에 추가한다.
-    대량 적재(전체 재구축) 시 사용하며, 디스크 저장은 호출자가 마지막에 save_index()로 한 번에 처리한다.
+    여러 도서의 임베딩을 HF API로 계산해 인덱스에 추가한다.
+    디스크 저장은 호출자가 마지막에 save_index()로 한 번에 처리한다.
     """
     if not books:
         return
@@ -95,7 +116,7 @@ def add_books(books):
 
 
 def add_book(book):
-    """신규 도서 1건의 임베딩을 계산해 인덱스에 추가하고 즉시 디스크에 저장한다."""
+    """신규 도서 1건의 임베딩을 HF API로 계산해 인덱스에 추가하고 즉시 저장한다."""
     add_books([book])
     save_index()
 

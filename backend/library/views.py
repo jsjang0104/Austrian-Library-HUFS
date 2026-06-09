@@ -84,10 +84,15 @@ class BookViewSet(viewsets.ModelViewSet):
         keyword_books = list(self._filter_by_keyword(base_qs, query))
         seen_ids = {book.book_id for book in keyword_books}
 
-        vector_ids = [
-            book_id for book_id, _score in search_service.vector_search(query, top_k=20)
-            if book_id not in seen_ids
-        ]
+        try:
+            vector_ids = [
+                book_id for book_id, _score in search_service.vector_search(query, top_k=20)
+                if book_id not in seen_ids
+            ]
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning("vector_search 실패, 키워드 결과만 반환: %s", exc)
+            vector_ids = []
         vector_book_map = base_qs.in_bulk(vector_ids)
         vector_books = [vector_book_map[book_id] for book_id in vector_ids if book_id in vector_book_map]
 

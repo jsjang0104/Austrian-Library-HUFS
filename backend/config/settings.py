@@ -123,6 +123,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+HF_API_TOKEN = config("HF_API_TOKEN", default="")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
