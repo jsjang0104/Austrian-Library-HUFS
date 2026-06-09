@@ -751,7 +751,7 @@ a.site-title {
 
 .search-container .rectangle-ai {
   width: 130px;
-  background-color: transparent;
+  background-color: white;
   color: #002D56;
   border: 3px solid #002D56;
   font-size: 18px;

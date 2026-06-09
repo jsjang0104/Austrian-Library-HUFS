@@ -78,7 +78,7 @@ function Search() {
   }, [selectedLang, selectedCategory, selectedStatus]);
 
   useEffect(() => {
-    if (searched) fetchBooks(keyword);
+    if (keyword.trim()) fetchBooks(keyword);
   }, [aiSearch]);
 
   const handleSearch = (e) => {
