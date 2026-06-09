@@ -1,11 +1,13 @@
-# 도서 데이터 임베딩 및 FAISS index 구축
+# HUFS 2026-1 Information Retrieval and Recommender System
+
+## 도서 데이터 임베딩 및 FAISS index 구축
 
 1. 기존 도서 데이터 4322 권에 대하여 로컬 GPU에서 임베딩 진행후 FAISS index 구축(books.faiss).
   - 사용 모델: paraphrase-multilingual-MiniLM-L12-v2 (GPU에 직접 로드)
 
   - 입력 텍스트에는 다음 정보가 포함된다: title(기존), author(기존), category(기존), 맥락(llm 생성)
 
-  - llm 생성 맥락 텍스트는  Qwen2.5-32B-Instruct를 이용 (GPU에 직접 로드) 프롬프트는 다음과 같다.
+  - llm 생성 맥락 텍스트는  Qwen2.5-14B를 이용 (GPU에 직접 로드) 프롬프트는 다음과 같다.
   
   """ write down the short German explanation of the following book. the explanation sentence should be under 20 words. The book's information is: 
     - title: {title}, 
@@ -27,7 +29,7 @@
   - 다음으로 도서별 고유 번호를 기반으로 '키워드 검색 결과'와 '의미 기반 검색결과'를 비교하여 중복 도서 제거 
   - 최종적으로 키워드 매칭 결과 아래에 의미 기반 검색 결과를 추가하여 사용자에게 반환
 
-# 파일 구조
+## 파일 구조
 
 ```
 Austrian-Library-HUFS/
