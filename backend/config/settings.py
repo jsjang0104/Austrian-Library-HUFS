@@ -138,5 +138,10 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
+        "library": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
     },
 }
