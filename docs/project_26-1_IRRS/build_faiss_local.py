@@ -24,15 +24,11 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 from library.models import Book
+from library.search_service import book_text
 
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 FAISS_OUT = os.path.join(BACKEND_DIR, "media", "search_index", "books.faiss")
 BATCH_SIZE = 128
-
-
-def book_text(book) -> str:
-    parts = [book.title, book.author or "", book.category or "", book.search_text or ""]
-    return " ".join(p for p in parts if p).strip()
 
 
 def main():
