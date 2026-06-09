@@ -118,11 +118,11 @@ function Search() {
               className="search-input-lg"
             >
               <option value="">-- 분야 전체 --</option>
-              <option value="Literatur">문학</option>
-              <option value="Sprachwissenschaft">언어학</option>
-              <option value="Geschichte">역사</option>
-              <option value="Sozialwissenschaften">사회과학</option>
-              <option value="Sonstiges">기타</option>
+              <option value="문학">문학</option>
+              <option value="어학">어학</option>
+              <option value="역사">역사</option>
+              <option value="사회과학">사회과학</option>
+              <option value="기타">기타</option>
             </select>
 
             <select 
