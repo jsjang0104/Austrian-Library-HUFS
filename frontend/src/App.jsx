@@ -47,9 +47,16 @@ function HomePage() {
   }, []); 
 
   const handleMainSearch = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (keyword.trim()) {
       navigate(`/search?search=${keyword}`);
+    }
+  };
+
+  const handleMainAISearch = (e) => {
+    e.preventDefault();
+    if (keyword.trim()) {
+      navigate(`/search?search=${keyword}&ai=1`);
     }
   };
 
@@ -120,7 +127,10 @@ function HomePage() {
             />
             
             <button className="rectangle-4" type="submit" aria-label="검색">
-              <span className="visually-hidden">검색</span>
+              검색
+            </button>
+            <button className="rectangle-ai" type="button" onClick={handleMainAISearch} aria-label="AI 검색">
+              ✦ AI 검색
             </button>
           </form>
         </section>

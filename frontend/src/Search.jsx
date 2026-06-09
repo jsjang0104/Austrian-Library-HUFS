@@ -6,13 +6,14 @@ import './App.css';
 function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('search') || '';
+  const initialAI = searchParams.get('ai') === '1';
 
-  const [keyword, setKeyword] = useState(initialQuery); 
+  const [keyword, setKeyword] = useState(initialQuery);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  const [aiSearch, setAiSearch] = useState(false);
+  const [aiSearch, setAiSearch] = useState(initialAI);
 
   const [selectedLang, setSelectedLang] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
