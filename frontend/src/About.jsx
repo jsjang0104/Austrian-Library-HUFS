@@ -82,7 +82,7 @@ function About() {
         <h3>2.2 시스템 설계</h3>
           <p>
           Pretrained-Model: <a href="https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">paraphrase-multilingual-MiniLM-L12-v2</a><br />
-          벡터 검색: FAISS (IndexIDMap + IndexFlatIP, L2 정규화 내적 유사도)<br />
+          벡터 검색: FAISS<br />
           <br />
           <strong>임베딩 입력 텍스트 구성</strong><br />
           단순 제목·저자 정보만으로는 의미 검색 품질이 낮아, 각 도서에 대해 <a href="https://huggingface.co/Qwen/Qwen2.5-14B-Instruct">LLM</a>이 생성한
