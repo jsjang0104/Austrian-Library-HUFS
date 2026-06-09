@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 EMBEDDING_DIM = 384  # paraphrase-multilingual-MiniLM-L12-v2 출력 차원
 
-_HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{EMBEDDING_MODEL_NAME}"
+# OpenAI 호환 embeddings 엔드포인트 (router.huggingface.co 신규 API)
+_HF_API_URL = "https://router.huggingface.co/hf-inference/v1/embeddings"
 _HF_BATCH_SIZE = 32
 _HF_TIMEOUT = 60
 
@@ -39,6 +40,7 @@ def _hf_headers():
 def embed_texts(texts):
     """
     HF Inference API로 텍스트 배치를 L2 정규화된 임베딩 행렬(float32)로 변환한다.
+    OpenAI 호환 /v1/embeddings 엔드포인트 사용.
     429/503 응답에는 지수 백오프로 최대 3회 재시도한다.
     실패 시 예외를 발생시킨다.
     """
@@ -51,15 +53,19 @@ def embed_texts(texts):
             resp = requests.post(
                 _HF_API_URL,
                 headers=headers,
-                json={"inputs": batch},
+                json={"model": EMBEDDING_MODEL_NAME, "input": batch},
                 timeout=_HF_TIMEOUT,
             )
             if resp.status_code in (429, 503) and attempt < 2:
                 time.sleep(2 ** attempt)
                 continue
+            if not resp.ok:
+                logger.warning("HF API %s 에러 응답: %s", resp.status_code, resp.text[:500])
             resp.raise_for_status()
             break
-        all_vectors.extend(resp.json())
+        data = resp.json()["data"]
+        embeddings = [item["embedding"] for item in sorted(data, key=lambda x: x["index"])]
+        all_vectors.extend(embeddings)
 
     vectors = np.array(all_vectors, dtype="float32")
     norms = np.linalg.norm(vectors, axis=1, keepdims=True)
