@@ -74,14 +74,16 @@ function Search() {
     }
   }, [selectedLang, selectedCategory, selectedStatus]);
 
-  useEffect(() => {
-    if (keyword.trim()) fetchBooks(keyword, aiSearch);
-  }, [aiSearch]);
-
   const handleSearch = (e) => {
     e.preventDefault();
+    setAiSearch(false);
     setSearchParams({ search: keyword });
-    fetchBooks(keyword, aiSearch);
+    fetchBooks(keyword, false);
+  };
+
+  const handleAISearch = () => {
+    setAiSearch(true);
+    if (keyword.trim()) fetchBooks(keyword, true);
   };
 
   return (
@@ -104,7 +106,7 @@ function Search() {
             <button
               type="button"
               className={`ai-search-btn${aiSearch ? ' active' : ''}`}
-              onClick={() => setAiSearch(v => !v)}
+              onClick={handleAISearch}
               title="AI 검색 모드: 의미 기반 하이브리드 검색을 사용합니다"
             >
               ✦ AI 검색
